@@ -1,8 +1,10 @@
+import json
+
 from tinygrad import Tensor, TinyJit, dtypes, nn
 from tinygrad.nn.datasets import mnist
 
 
-class Model:
+class TinyConvNet:
     def __init__(self):
         self.l1 = nn.Conv2d(1, 6, kernel_size=3, padding=1, bias=False)
         self.l2 = nn.Conv2d(6, 20, kernel_size=3, padding=1, bias=False)
@@ -11,7 +13,7 @@ class Model:
     def __call__(self, x: Tensor) -> Tensor:
         x = self.l1(x).relu().max_pool2d((2, 2))  # 28 -> 14
         x = self.l2(x).relu().max_pool2d((2, 2))  # 14 -> 7
-        x = x.dropout(0.1)
+        x = x.dropout(0.05)
         x = self.l3(x)
         x = x.mean((2, 3))
         return x
@@ -34,7 +36,7 @@ X_train, Y_train, X_test, Y_test = mnist()
 X_train = (X_train >= 127.5).cast(dtypes.float32)
 X_test = (X_test >= 127.5).cast(dtypes.float32)
 
-model = Model()
+model = TinyConvNet()
 print_param_summary(model)
 
 optim = nn.optim.AdamW(nn.state.get_parameters(model), lr=0.002)
@@ -60,3 +62,15 @@ for i in range(40000):
         Tensor.training = False
         acc = (model(X_test).argmax(axis=1) == Y_test).mean().item()
         print(f'step {i:5d}, loss {loss.item():.2f}, acc {acc * 100.0:.2f}%')
+
+state_dict = nn.state.get_state_dict(model)
+
+# nn.state.safe_save(state_dict, 'model.safetensors')
+
+serializable = {}
+for name, tensor in state_dict.items():
+    arr = tensor.numpy().flatten().tolist()
+    serializable[name] = {'shape': list(tensor.shape), 'dtype': str(tensor.dtype), 'data': arr}
+
+with open('model.json', 'w', encoding='utf-8', newline='\n') as f:
+    json.dump(serializable, f, indent=2)
