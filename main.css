@@ -1,0 +1,43 @@
+* {
+  font-family: monospace;
+}
+
+html,
+body {
+  box-sizing: border-box;
+}
+
+body {
+  min-block-size: 100dvh;
+  margin: 0;
+  padding: 1rem;
+  font-size: 1rem;
+}
+
+header {
+  margin-bottom: 1rem;
+}
+
+.board {
+  > .cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+  }
+
+  --cell-size: 1rem;
+  padding: 0;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  border: 2px solid dimgray;
+  user-select: none;
+  cursor: crosshair;
+}
+
+.clear {
+  margin-inline-end: 0.75rem;
+}
+
+:root:has(.clear:active) {
+  transition: none;
+}

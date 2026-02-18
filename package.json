@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json.schemastore.org/package.json",
+  "name": "css-handwritten-digit-recognition",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.2",
+    "@types/bun": "latest"
+  },
+  "dependencies": {
+    "hono": "^4.11.9"
+  }
+}
