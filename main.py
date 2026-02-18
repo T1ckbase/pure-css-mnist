@@ -1,7 +1,7 @@
-import json
-
 from tinygrad import Tensor, TinyJit, dtypes, nn
 from tinygrad.nn.datasets import mnist
+
+from css import generate
 
 
 class TinyConvNet:
@@ -13,10 +13,9 @@ class TinyConvNet:
     def __call__(self, x: Tensor) -> Tensor:
         x = self.l1(x).relu().max_pool2d((2, 2))  # 28 -> 14
         x = self.l2(x).relu().max_pool2d((2, 2))  # 14 -> 7
-        x = x.dropout(0.05)
+        x = x.dropout(0.01)
         x = self.l3(x)
-        x = x.mean((2, 3))
-        return x
+        return x.mean((2, 3))
 
 
 def print_param_summary(model):
@@ -44,8 +43,8 @@ batch_size = 128
 
 
 @TinyJit
+@Tensor.train()
 def train_step():
-    Tensor.training = True
     samples = Tensor.randint(batch_size, high=X_train.shape[0])
 
     X, Y = X_train[samples], Y_train[samples]
@@ -65,12 +64,5 @@ for i in range(40000):
 
 state_dict = nn.state.get_state_dict(model)
 
-# nn.state.safe_save(state_dict, 'model.safetensors')
-
-serializable = {}
-for name, tensor in state_dict.items():
-    arr = tensor.numpy().flatten().tolist()
-    serializable[name] = {'shape': list(tensor.shape), 'dtype': str(tensor.dtype), 'data': arr}
-
-with open('model.json', 'w', encoding='utf-8', newline='\n') as f:
-    json.dump(serializable, f, indent=2)
+with open('model.css', 'w', encoding='utf-8', newline='\n') as f:
+    f.write(generate(state_dict))
