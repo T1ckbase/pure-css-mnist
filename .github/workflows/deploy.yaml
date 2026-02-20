@@ -1,4 +1,4 @@
-name: Deploy
+name: GitHub Pages Deployment
 
 on:
   push:
@@ -34,6 +34,8 @@ jobs:
           path: ./dist
 
   deploy:
+    name: Deploy
+
     permissions:
       pages: write
       id-token: write
