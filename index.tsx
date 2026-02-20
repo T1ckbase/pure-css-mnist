@@ -16,18 +16,33 @@ const Board: FC<{ width: number; height: number }> = ({ width, height }) => {
 };
 
 function generateBoardCSS(cells: number): string {
-  // const inf = '@property --inf { syntax: "<time>"; inherits: true; initial-value: 999999s; }';
-  const transitions: string[] = [];
-  const boardCells: string[] = [];
-  const activedCells: string[] = [];
+  const defaultTransitions: string[] = [];
+  const boardCellsCSS: string[] = [];
+  const activeCellsCSS: string[] = [];
+
   for (let i = 0; i < cells; i++) {
-    transitions.push(`--in-${i} 1s 999999s`);
-    boardCells.push(`.board > .cell-${i} { background-color: hsl(0 0% calc(var(--in-${i}) * 100%)); }`);
-    activedCells.push(
-      `:root:has(.board > .cell:active):has(.board > .cell-${i}:hover) { --in-${i}: 1; transition: ${Array.from({ length: cells }, (_, j) => (j === i ? `--in-${j} 0s` : `--in-${j} 1s 999999s`)).join(',')} }`,
+    defaultTransitions.push(`--in-${i} 1s 999999s`);
+  }
+
+  for (let i = 0; i < cells; i++) {
+    boardCellsCSS.push(`.board>.cell-${i}{background-color:hsl(0 0% calc(var(--in-${i})*100%));}`);
+
+    const activeTransitions = [...defaultTransitions];
+    activeTransitions[i] = `--in-${i} 0s 0s`;
+
+    activeCellsCSS.push(
+      `:root:has(.board>.cell:active):has(.board>.cell-${i}:hover){` +
+        `--in-${i}:1;` +
+        `transition:${activeTransitions.join(',')};` +
+        `}`,
     );
   }
-  return [`:root { transition: ${transitions.join(',')}; }`, boardCells.join('\n'), activedCells.join('\n')].join('\n');
+
+  return [
+    `:root{transition:${defaultTransitions.join(',')};}`,
+    boardCellsCSS.join('\n'),
+    activeCellsCSS.join('\n'),
+  ].join('\n');
 }
 
 const jsxElement = (
