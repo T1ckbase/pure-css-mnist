@@ -24,7 +24,7 @@ header {
     height: var(--cell-size);
   }
 
-  --cell-size: 1rem;
+  --cell-size: min(1rem, calc((100vw - 2rem - 4px) / 28));
   padding: 0;
   margin-bottom: 0.75rem;
   display: flex;
@@ -40,4 +40,35 @@ header {
 
 :root:has(.clear:active) {
   transition: none;
+}
+
+.prediction-results {
+  font-family: monospace;
+  width: min(100%, 28rem);
+  margin-block-start: 1rem;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.bar-row span {
+  width: 1rem;
+}
+
+.track {
+  flex: 1;
+  height: 0.9lh;
+  background: dimgray;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background-color: currentColor;
+  width: calc(var(--p) * 100%);
+  transition: width 80ms ease-out;
 }

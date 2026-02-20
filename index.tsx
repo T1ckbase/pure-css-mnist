@@ -1,6 +1,8 @@
 import { rm } from 'node:fs/promises';
 import type { FC } from 'hono/jsx';
 
+const PRODUCTION = Bun.env.NODE_ENV === 'production';
+
 const H = 28;
 const W = 28;
 
@@ -22,7 +24,7 @@ function generateBoardCSS(cells: number): string {
     transitions.push(`--in-${i} 1s 999999s`);
     boardCells.push(`.board > .cell-${i} { background-color: hsl(0 0% calc(var(--in-${i}) * 100%)); }`);
     activedCells.push(
-      `:root:has(.board > .cell:active):has(.board > .cell-${i}:hover) { --in-${i}: 1; transition: ${Array.from({ length: cells }, (_, j) => (j === i ? `--in-${j} 0s 0s` : `--in-${j} 1s 999999s`)).join(',')} }`,
+      `:root:has(.board > .cell:active):has(.board > .cell-${i}:hover) { --in-${i}: 1; transition: ${Array.from({ length: cells }, (_, j) => (j === i ? `--in-${j} 0s` : `--in-${j} 1s 999999s`)).join(',')} }`,
     );
   }
   return [`:root { transition: ${transitions.join(',')}; }`, boardCells.join('\n'), activedCells.join('\n')].join('\n');
@@ -33,6 +35,7 @@ const jsxElement = (
     <head>
       <meta charset='UTF-8' />
       <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+      <link rel='icon' href='data:,' />
       <meta name='color-scheme' content='dark' />
       <meta name='description' content='Pure CSS implementation of a CNN for MNIST digit recognition' />
       <meta
@@ -54,15 +57,20 @@ const jsxElement = (
       <button type='button' class='clear'>
         clear
       </button>
-      <div class='debug'>debug:</div>
-      {/* <div class='debug1'></div> */}
-      {/* <div class='test'></div> */}
+      <div class='prediction-results'>
+        {Array.from({ length: 10 }, (_, i) => (
+          <div class='bar-row'>
+            <span>{i}</span>
+            <div class='track'>
+              <div class='fill' style={`--p: var(--prob-${i})`}></div>
+            </div>
+          </div>
+        ))}
+      </div>
     </body>
   </html>
 );
 const html = `<!DOCTYPE html>${jsxElement.toString()}`;
-// await Bun.write('./dist/index.html', html);
-// await Bun.write('./dist/board.css', generateBoardCSS(H * W));
 
 await rm('./dist', { recursive: true, force: true });
 await Bun.build({
@@ -71,9 +79,12 @@ await Bun.build({
     './index.html': html,
     './board.css': generateBoardCSS(H * W),
   },
+  minify: PRODUCTION,
   outdir: './dist',
+  publicPath: PRODUCTION ? 'https://t1ckbase.github.io/pure-css-mnist/' : undefined,
 });
 
+// https://github.com/oven-sh/bun/issues/16920
 // Remove js
 await rm(new Bun.Glob('./dist/*.js').scanSync().next().value);
 Bun.write(
