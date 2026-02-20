@@ -1,6 +1,6 @@
 {
   "$schema": "http://json.schemastore.org/package.json",
-  "name": "css-handwritten-digit-recognition",
+  "name": "pure-css-mnist",
   "module": "index.ts",
   "type": "module",
   "private": true,
