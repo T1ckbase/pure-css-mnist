@@ -12,6 +12,13 @@ Input (28×28 binary) → Conv2d(1→4, 5×5, stride=4) → LeakyReLU(0.01) → 
 
 ## Usage
 
+### Install dependencies
+
+```bash
+uv sync
+bun install
+```
+
 ### Train the model
 
 ```bash
