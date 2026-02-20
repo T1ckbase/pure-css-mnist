@@ -25,7 +25,7 @@ header {
 }
 
 .board {
-  >.cell {
+  > .cell {
     inline-size: var(--cell-size);
     block-size: var(--cell-size);
   }
@@ -37,6 +37,7 @@ header {
   flex-wrap: wrap;
   border: 2px solid dimgray;
   user-select: none;
+  -webkit-user-select: none;
   cursor: crosshair;
 }
 
