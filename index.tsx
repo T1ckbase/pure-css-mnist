@@ -9,7 +9,7 @@ const W = 28;
 const Board: FC<{ width: number; height: number }> = ({ width, height }) => {
   const cells = Array.from({ length: width * height }, (_, i) => <div class={`cell cell-${i}`}></div>);
   return (
-    <div class='board' style={{ width: `calc(var(--cell-size) * ${width})` }}>
+    <div class='board' style={{ width: `calc(var(--cell-size) * ${width})` }} role='img' aria-label='drawing board'>
       {cells}
     </div>
   );
@@ -49,13 +49,19 @@ const jsxElement = (
   <html lang='en'>
     <head>
       <meta charset='UTF-8' />
-      <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+      <meta name='viewport' content='width=device-width, initial-scale=1.0, viewport-fit=cover' />
       <link rel='icon' href='data:,' />
       <meta name='color-scheme' content='dark' />
-      <meta name='description' content='Pure CSS implementation of a CNN for MNIST digit recognition' />
+      <meta name='description' content='Handwritten digit recognition implemented entirely in CSS.' />
       <meta
         name='keywords'
         content='CSS, machine learning, handwritten digit recognition, neural network, front-end AI, web development, MNIST, CNN'
+      />
+      <meta property='og:title' content='Pure CSS MNIST' />
+      <meta property='og:description' content='Handwritten digit recognition implemented entirely in CSS.' />
+      <meta
+        property='og:image'
+        content='https://github.com/user-attachments/assets/5b39a118-509d-4fb2-932a-31f12106983b'
       />
       <title>Pure CSS MNIST</title>
       <link rel='stylesheet' href='./model.css' />
@@ -63,13 +69,16 @@ const jsxElement = (
       <link rel='stylesheet' href='./main.css' />
     </head>
     <body>
+      <noscript>JavaScript is disabled. Everything still works!</noscript>
       <header>
         <h1>Pure CSS MNIST</h1>
-        <a href='https://github.com/T1ckbase/css-handwritten-digit-recognition'>GITHUB</a>
+        <a href='https://github.com/T1ckbase/pure-css-mnist' aria-label='View source on GitHub'>
+          GitHub
+        </a>
       </header>
-      <div>Draw a digit in the box.</div>
+      <div>Draw a digit below.</div>
       <Board width={W} height={H} />
-      <button type='button' class='clear'>
+      <button type='button' class='clear' aria-label='Clear the drawing board'>
         clear
       </button>
       <div class='prediction-results'>

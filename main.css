@@ -16,12 +16,16 @@ body {
   margin-inline: auto;
 }
 
+noscript {
+  color: limegreen;
+}
+
 header {
   margin-bottom: 1rem;
 }
 
 .board {
-  > .cell {
+  >.cell {
     inline-size: var(--cell-size);
     block-size: var(--cell-size);
   }
