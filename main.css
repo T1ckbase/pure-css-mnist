@@ -12,6 +12,8 @@ body {
   margin: 0;
   padding: 1rem;
   font-size: 1rem;
+  max-inline-size: fit-content;
+  margin-inline: auto;
 }
 
 header {
@@ -20,8 +22,8 @@ header {
 
 .board {
   > .cell {
-    width: var(--cell-size);
-    height: var(--cell-size);
+    inline-size: var(--cell-size);
+    block-size: var(--cell-size);
   }
 
   --cell-size: min(1rem, calc((100vw - 2rem - 4px) / 28));
@@ -44,7 +46,7 @@ header {
 
 .prediction-results {
   font-family: monospace;
-  width: min(100%, 28rem);
+  inline-size: min(100%, 28rem);
   margin-block-start: 1rem;
 }
 
@@ -52,23 +54,23 @@ header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.25rem;
+  margin-block-end: 0.25rem;
 }
 
 .bar-row span {
-  width: 1rem;
+  inline-size: 1rem;
 }
 
 .track {
   flex: 1;
-  height: 0.9lh;
+  block-size: 0.9lh;
   background: dimgray;
   overflow: hidden;
 }
 
 .fill {
-  height: 100%;
+  block-size: 100%;
   background-color: currentColor;
-  width: calc(var(--p) * 100%);
+  inline-size: calc(var(--p) * 100%);
   transition: width 80ms ease-out;
 }
