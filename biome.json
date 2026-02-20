@@ -7,9 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": [
-      "**"
-    ]
+    "includes": ["**", "!model.css"]
   },
   "html": {
     "formatter": {
