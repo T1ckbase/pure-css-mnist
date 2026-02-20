@@ -1,4 +1,3 @@
-import numpy as np
 from tinygrad import Tensor
 
 
@@ -14,65 +13,54 @@ def var(name: str) -> str:
     return f'var(--{name})'
 
 
-def conv_relu_pool(w: np.ndarray, in_h: int, in_w: int, in_pfx: str, out_pfx: str) -> list[str]:
-    """Conv2d (no bias) + ReLU + MaxPool(2x2), fused into max(0, conv@each_pool_position)."""
-    c_out, c_in, kh, kw = w.shape
-    pad, out_h, out_w = kh // 2, in_h // 2, in_w // 2
-    css = []
-    for co in range(c_out):
-        for py in range(out_h):
-            for px in range(out_w):
-                pool = ['0']
-                for dy in range(2):
-                    for dx in range(2):
-                        y, x = py * 2 + dy, px * 2 + dx
-                        terms = []
-                        for ci in range(c_in):
-                            for ky in range(kh):
-                                for kx in range(kw):
-                                    iy, ix = y - pad + ky, x - pad + kx
-                                    if 0 <= iy < in_h and 0 <= ix < in_w:
-                                        src = (
-                                            f'{in_pfx}-{iy * in_w + ix}'
-                                            if c_in == 1
-                                            else f'{in_pfx}-{ci}-{iy * in_w + ix}'
-                                        )
-                                        terms.append(f'{var(src)} * {fmt(w[co, ci, ky, kx])}')
-                        if terms:
-                            pool.append(f'calc({" + ".join(terms)})')
-                name = f'{out_pfx}-{co}-{py * out_w + px}'
-                css += [prop(name), f':root {{ --{name}: max({", ".join(pool)}); }}']
-    return css
-
-
 def generate(state_dict: dict[str, Tensor]) -> str:
-    l1, l2, l3 = (state_dict[f'l{i}.weight'].numpy() for i in (1, 2, 3))
+    l1 = state_dict['l1.weight'].numpy()  # (4, 1, 5, 5)
+    l2 = state_dict['l2.weight'].numpy()  # (10, 4x6x6)
     css: list[str] = []
+
+    c_out, c_in, kh, kw = l1.shape
+    stride = 4
+    in_h, in_w = 28, 28
+    out_h = (in_h - kh) // stride + 1  # 6
+    out_w = (in_w - kw) // stride + 1  # 6
 
     # input: 28x28 binary pixels
     css += [prop(f'in-{i}') for i in range(784)]
 
-    # conv(1->6, 3x3, pad=1) + relu + maxpool(2x2): 28x28 -> 6x14x14
-    css += conv_relu_pool(l1, 28, 28, 'in', 'p1')
+    # conv(1->4, 5x5, stride=4, no pad) + leaky_relu(0.01): 28x28 -> 4x6x6
+    for co in range(c_out):
+        for oy in range(out_h):
+            for ox in range(out_w):
+                terms = []
+                for ci in range(c_in):
+                    for ky in range(kh):
+                        for kx in range(kw):
+                            iy, ix = oy * stride + ky, ox * stride + kx
+                            src = f'in-{iy * in_w + ix}'
+                            terms.append(f'{var(src)} * {fmt(l1[co, ci, ky, kx])}')
+                conv = f'calc({" + ".join(terms)})'
+                name = f'c-{co}-{oy * out_w + ox}'
+                css += [prop(name), f':root {{ --{name}: max(calc(0.01 * {conv}), {conv}); }}']
 
-    # conv(6->20, 3x3, pad=1) + relu + maxpool(2x2): 14x14 -> 20x7x7
-    css += conv_relu_pool(l2, 14, 14, 'p1', 'p2')
-
-    # global average pooling: 20x7x7 -> 20 (swapped before conv3 since 1x1 conv and mean commute)
-    for ch in range(l3.shape[1]):
-        terms = ' + '.join(var(f'p2-{ch}-{i}') for i in range(49))
-        css += [prop(f'avg-{ch}'), f':root {{ --avg-{ch}: calc(({terms}) / 49); }}']
-
-    # conv(20->10, 1x1): channel mixing -> 10 logits
-    for ch in range(l3.shape[0]):
-        terms = ' + '.join(f'{var(f"avg-{ci}")} * {fmt(l3[ch, ci, 0, 0])}' for ci in range(l3.shape[1]))
-        css += [prop(f'logit-{ch}'), f':root {{ --logit-{ch}: calc({terms}); }}']
+    # flatten + linear(4x6x6->10, no bias): 4x6x6 -> 10 logits
+    n_out, n_in = l2.shape
+    for i in range(n_out):
+        terms = []
+        for j in range(n_in):
+            co, pos = divmod(j, out_h * out_w)
+            src = f'c-{co}-{pos}'
+            terms.append(f'{var(src)} * {fmt(l2[i, j])}')
+        css += [prop(f'logit-{i}'), f':root {{ --logit-{i}: calc({" + ".join(terms)}); }}']
 
     # softmax
-    for i in range(10):
-        css += [prop(f'exp-{i}'), f':root {{ --exp-{i}: exp({var(f"logit-{i}")}); }}']
-    css += [prop('exp-sum'), f':root {{ --exp-sum: calc({" + ".join(var(f"exp-{i}") for i in range(10))}); }}']
-    for i in range(10):
+    css += [prop('logit-max'), f':root {{ --logit-max: max({", ".join(var(f"logit-{i}") for i in range(n_out))}); }}']
+    for i in range(n_out):
+        css += [prop(f'exp-{i}'), f':root {{ --exp-{i}: exp(calc({var(f"logit-{i}")} - {var("logit-max")})); }}']
+    css += [prop('exp-sum'), f':root {{ --exp-sum: calc({" + ".join(var(f"exp-{i}") for i in range(n_out))}); }}']
+    for i in range(n_out):
         css += [prop(f'prob-{i}'), f':root {{ --prob-{i}: calc({var(f"exp-{i}")} / {var("exp-sum")}); }}']
+
+    # https://github.com/oven-sh/bun/issues/27117
+    css.sort(key=lambda x: not x.startswith('@'))
 
     return '\n'.join(css)
