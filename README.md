@@ -37,14 +37,29 @@ Outputs static HTML to `dist/`.
 
 ## How Drawing Works
 
-Drawing uses a clever CSS-only trick:
+Drawing uses a clever CSS-only trick with `:has()` and custom properties.
 
-```css
-:root { transition: --in-X 1s 999999s; }
-:root:has(.board>.cell:active):has(.board>.cell-X:hover) { 
-  --in-X: 1; 
-  transition: --in-X 0s; 
-}
-```
+Each pixel (0-783) corresponds to a custom property `--in-X`.
 
-When a cell is hovered while any cell is active, the input variable is set to 1 immediately and persists for ~11.5 days.
+1. Default State:
+   By default, all input variables have a massive transition delay, effectively "freezing" their state.
+   ```css
+   :root {
+     /* Transition takes 1s but starts after 999,999s (approx 11.6 days) */
+     transition: --in-0 1s 999999s, --in-1 1s 999999s, ...;
+   }
+   ```
+
+2. Drawing State:
+   When the mouse is down (`.cell:active`) and hovering over a specific pixel (`.cell-X:hover`), we set that specific variable to 1.
+
+   We must explicitly define the transition list again. We set the current pixel's transition to `0s` (instant) while explicitly maintaining the long delay for all other pixels so they don't reset.
+
+   ```css
+   /* Example for pixel 0 */
+   :root:has(.board > .cell:active):has(.board > .cell-0:hover) { 
+     --in-0: 1; 
+     /* --in-0 updates instantly, others keep their state */
+     transition: --in-0 0s, --in-1 1s 999999s, --in-2 1s 999999s, ...; 
+   }
+   ```
