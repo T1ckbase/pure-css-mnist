@@ -2,7 +2,7 @@
 
 An MNIST demo that runs entirely in CSS.
 
-<img width="392" height="650" alt="MNIST Demo" src="https://github.com/user-attachments/assets/5b39a118-509d-4fb2-932a-31f12106983b" />
+![MNIST Demo](./preview.png)
 
 ### Architecture
 

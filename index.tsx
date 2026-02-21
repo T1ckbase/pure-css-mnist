@@ -53,18 +53,20 @@ const jsxElement = (
       <link rel='icon' href='data:,' />
       <meta name='color-scheme' content='dark' />
       <meta name='description' content='Handwritten digit recognition implemented entirely in CSS.' />
-      <meta
-        name='keywords'
-        content='CSS, machine learning, handwritten digit recognition, neural network, front-end AI, web development, MNIST, CNN'
-      />
+      <link rel='canonical' href='https://t1ckbase.github.io/pure-css-mnist/' />
+      <meta property='og:type' content='website' />
       <meta property='og:title' content='Pure CSS MNIST' />
       <meta property='og:description' content='Handwritten digit recognition implemented entirely in CSS.' />
-      <meta
-        property='og:image'
-        content='https://github.com/user-attachments/assets/5b39a118-509d-4fb2-932a-31f12106983b'
-      />
+      <meta property='og:image' content='https://t1ckbase.github.io/pure-css-mnist/preview.png' />
+      <meta property='og:image:width' content='788' />
+      <meta property='og:image:height' content='392' />
+      <meta property='og:image:type' content='image/png' />
+      <meta name='twitter:card' content='summary_large_image' />
+      <meta name='twitter:image' content='https://t1ckbase.github.io/pure-css-mnist/preview.png' />
+      <meta name='twitter:title' content='Pure CSS MNIST' />
+      <meta name='twitter:description' content='Handwritten digit recognition implemented entirely in CSS.' />
       <meta name='google-site-verification' content='q_oFNZJdR5irDJRITMlBYMaT1WWHWhfpxTp1-4AlcIc' />
-      <title>Pure CSS MNIST</title>
+      <title>Pure CSS MNIST | Handwritten Digit Recognition without JavaScript</title>
       <link rel='stylesheet' href='./model.css' />
       <link rel='stylesheet' href='./board.css' />
       <link rel='stylesheet' href='./main.css' />
@@ -108,6 +110,8 @@ await Bun.build({
   outdir: './dist',
   publicPath: PRODUCTION ? 'https://t1ckbase.github.io/pure-css-mnist/' : undefined,
 });
+
+await Bun.write('./dist/preview.png', Bun.file('./preview.png'));
 
 // https://github.com/oven-sh/bun/issues/16920
 // Remove js
