@@ -63,6 +63,7 @@ const jsxElement = (
         property='og:image'
         content='https://github.com/user-attachments/assets/5b39a118-509d-4fb2-932a-31f12106983b'
       />
+      <meta name='google-site-verification' content='q_oFNZJdR5irDJRITMlBYMaT1WWHWhfpxTp1-4AlcIc' />
       <title>Pure CSS MNIST</title>
       <link rel='stylesheet' href='./model.css' />
       <link rel='stylesheet' href='./board.css' />
