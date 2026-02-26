@@ -60,7 +60,4 @@ def generate(state_dict: dict[str, Tensor]) -> str:
     for i in range(n_out):
         css += [prop(f'prob-{i}'), f':root {{ --prob-{i}: calc({var(f"exp-{i}")} / {var("exp-sum")}); }}']
 
-    # https://github.com/oven-sh/bun/issues/27117
-    css.sort(key=lambda x: not x.startswith('@'))
-
     return '\n'.join(css)

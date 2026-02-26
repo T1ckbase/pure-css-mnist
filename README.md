@@ -12,6 +12,8 @@ Input (28×28 binary) → Conv2d(1→4, 5×5, stride=4) → LeakyReLU(0.01) → 
 
 ## Usage
 
+Requires **Bun v1.3.10+**
+
 ### Install dependencies
 
 ```bash
