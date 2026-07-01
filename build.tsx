@@ -116,7 +116,7 @@ await Bun.write('./dist/preview.png', Bun.file('./preview.png'));
 // https://github.com/oven-sh/bun/issues/16920
 // Remove js
 await rm(new Bun.Glob('./dist/*.js').scanSync().next().value);
-Bun.write(
+await Bun.write(
   './dist/index.html',
   new HTMLRewriter()
     .on('script', {

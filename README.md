@@ -32,7 +32,7 @@ This trains the network and generates `model.css`.
 ### Build the frontend
 
 ```bash
-bun run index.tsx
+bun build.tsx
 ```
 
 Outputs static HTML to `dist/`.
@@ -59,9 +59,9 @@ Each pixel (0-783) corresponds to a custom property `--in-X`.
 
    ```css
    /* Example for pixel 0 */
-   :root:has(.board > .cell:active):has(.board > .cell-0:hover) { 
-     --in-0: 1; 
+   :root:has(.board > .cell:active):has(.board > .cell-0:hover) {
+     --in-0: 1;
      /* --in-0 updates instantly, others keep their state */
-     transition: --in-0 0s, --in-1 1s 999999s, --in-2 1s 999999s, ...; 
+     transition: --in-0 0s, --in-1 1s 999999s, --in-2 1s 999999s, ...;
    }
    ```
